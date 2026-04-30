@@ -1,0 +1,1819 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Environmental Monitoring & Risk Analysis | Team 05</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&family=Open+Sans:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --blue-dark: #1a3a6b;
+    --blue-mid: #1e5799;
+    --blue-light: #2e86c1;
+    --teal: #1abc9c;
+    --orange: #e67e22;
+    --red: #c0392b;
+    --red-dark: #8b0000;
+    --gold: #f39c12;
+    --purple: #7d3c98;
+    --green: #27ae60;
+    --bg-light: #f0f4f8;
+    --bg-card: #ffffff;
+    --text-dark: #1a2535;
+    --text-mid: #4a5568;
+    --text-light: #718096;
+    --border: #d0dce8;
+    --shadow: 0 4px 20px rgba(26,58,107,0.12);
+    --shadow-lg: 0 8px 40px rgba(26,58,107,0.18);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Open Sans', sans-serif;
+    background: var(--bg-light);
+    color: var(--text-dark);
+    overflow: hidden;
+    height: 100vh;
+    width: 100vw;
+  }
+
+  /* ── SLIDESHOW WRAPPER ── */
+  .slideshow {
+    width: 100%;
+    height: 100vh;
+    position: relative;
+  }
+
+  .slide {
+    position: absolute;
+    inset: 0;
+    display: none !important;
+    flex-direction: column;
+    background: var(--bg-light);
+    animation: fadeIn .45s ease;
+    overflow-y: auto;
+    padding: 32px 48px 80px;
+  }
+  .slide.active { display: flex !important; }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ── SLIDE HEADER PATTERN ── */
+  .slide-header {
+    margin-bottom: 28px;
+    position: relative;
+    padding-left: 18px;
+  }
+  .slide-header::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 5px;
+    background: linear-gradient(180deg, var(--blue-mid), var(--teal));
+    border-radius: 3px;
+  }
+  .slide-header h2 {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 1.75rem;
+    font-weight: 800;
+    color: var(--blue-dark);
+    line-height: 1.15;
+  }
+  .slide-header p {
+    font-style: italic;
+    color: var(--text-mid);
+    margin-top: 4px;
+    font-size: .95rem;
+  }
+
+  /* ── NAVIGATION ── */
+  .nav {
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    height: 56px;
+    background: var(--blue-dark);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 24px;
+    z-index: 1000;
+    box-shadow: 0 -4px 20px rgba(0,0,0,.25);
+  }
+  .nav-left, .nav-right { display: flex; gap: 8px; align-items: center; }
+  .nav button {
+    background: rgba(255,255,255,.12);
+    border: 1px solid rgba(255,255,255,.2);
+    color: #fff;
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 600;
+    font-size: .82rem;
+    padding: 6px 18px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background .2s;
+  }
+  .nav button:hover { background: rgba(255,255,255,.25); }
+  .nav button:disabled { opacity: .35; cursor: default; }
+  .nav-center {
+    display: flex;
+    gap: 5px;
+    align-items: center;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  .nav-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: rgba(255,255,255,.3);
+    cursor: pointer;
+    transition: background .2s, transform .2s;
+  }
+  .nav-dot.active { background: var(--teal); transform: scale(1.4); }
+  .slide-counter {
+    color: rgba(255,255,255,.6);
+    font-size: .78rem;
+    font-family: 'Montserrat', sans-serif;
+    min-width: 60px;
+    text-align: right;
+  }
+
+  /* ── CARDS ── */
+  .card {
+    background: var(--bg-card);
+    border-radius: 14px;
+    box-shadow: var(--shadow);
+    padding: 22px 26px;
+  }
+  .card-grid {
+    display: grid;
+    gap: 18px;
+  }
+  .card-grid.col2 { grid-template-columns: 1fr 1fr; }
+  .card-grid.col3 { grid-template-columns: repeat(3, 1fr); }
+
+  /* ── STAT BUBBLE ── */
+  .stat-big {
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 900;
+    font-size: 2.8rem;
+    line-height: 1;
+  }
+  .stat-label {
+    font-size: .82rem;
+    color: var(--text-light);
+    margin-top: 4px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: .05em;
+  }
+
+  /* color helpers */
+  .c-blue  { color: var(--blue-mid); }
+  .c-teal  { color: var(--teal); }
+  .c-red   { color: var(--red); }
+  .c-orange{ color: var(--orange); }
+  .c-gold  { color: var(--gold); }
+  .c-green { color: var(--green); }
+  .c-purple{ color: var(--purple); }
+  .c-dark  { color: var(--blue-dark); }
+
+  /* border-top accent helpers */
+  .bt-blue   { border-top: 4px solid var(--blue-mid); }
+  .bt-teal   { border-top: 4px solid var(--teal); }
+  .bt-red    { border-top: 4px solid var(--red); }
+  .bt-orange { border-top: 4px solid var(--orange); }
+  .bt-gold   { border-top: 4px solid var(--gold); }
+  .bt-purple { border-top: 4px solid var(--purple); }
+  .bt-green  { border-top: 4px solid var(--green); }
+
+  /* ── BLUE BANNER ROW ── */
+  .banner-row {
+    background: var(--blue-dark);
+    border-radius: 12px;
+    padding: 16px 28px;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    color: #fff;
+    gap: 12px;
+  }
+  .banner-item { text-align: center; }
+  .banner-item .val {
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 800;
+    font-size: 1.7rem;
+    line-height: 1;
+  }
+  .banner-item .lbl {
+    font-size: .78rem;
+    opacity: .75;
+    margin-top: 3px;
+    text-transform: uppercase;
+    letter-spacing: .05em;
+  }
+  .banner-sep {
+    width: 1px; height: 44px;
+    background: rgba(255,255,255,.2);
+  }
+
+  /* ── ALERT BOX ── */
+  .alert-box {
+    border-radius: 10px;
+    padding: 14px 20px;
+    font-size: .9rem;
+  }
+  .alert-box.warning {
+    background: #fff3cd;
+    border-left: 5px solid var(--gold);
+    color: #7d5a00;
+  }
+  .alert-box.danger {
+    background: #fde8e8;
+    border-left: 5px solid var(--red);
+    color: #7b1c1c;
+    font-weight: 600;
+  }
+  .alert-box.info {
+    background: #dbeafe;
+    border-left: 5px solid var(--blue-mid);
+    color: #1e4080;
+  }
+  .alert-box.success {
+    background: #d4edda;
+    border-left: 5px solid var(--green);
+    color: #155724;
+  }
+
+  /* ── PILL BADGE ── */
+  .badge {
+    display: inline-block;
+    padding: 3px 12px;
+    border-radius: 999px;
+    font-size: .75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+  }
+  .badge-red    { background: #fde8e8; color: var(--red); }
+  .badge-gold   { background: #fef3cd; color: #7d5a00; }
+  .badge-green  { background: #d4edda; color: #155724; }
+  .badge-blue   { background: #dbeafe; color: var(--blue-dark); }
+
+  /* ── TABLE ── */
+  .data-table { width: 100%; border-collapse: collapse; font-size: .85rem; }
+  .data-table thead th {
+    background: var(--blue-dark);
+    color: #fff;
+    padding: 9px 12px;
+    text-align: left;
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 700;
+    font-size: .78rem;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+  }
+  .data-table tbody tr:nth-child(odd) { background: #f8fafc; }
+  .data-table tbody tr:hover { background: #eaf2ff; }
+  .data-table tbody td { padding: 9px 12px; border-bottom: 1px solid var(--border); }
+  .data-table .node-tag {
+    display: inline-block;
+    padding: 2px 10px;
+    border-radius: 6px;
+    font-weight: 700;
+    font-size: .78rem;
+    font-family: 'Montserrat', sans-serif;
+  }
+
+  /* ── STACKED BAR ── */
+  .stacked-bar-wrap { margin-bottom: 16px; }
+  .stacked-bar-label {
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 700;
+    font-size: .88rem;
+    margin-bottom: 5px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .stacked-bar {
+    height: 32px;
+    border-radius: 8px;
+    overflow: hidden;
+    display: flex;
+  }
+  .stacked-bar .seg {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: .72rem;
+    font-weight: 700;
+    color: #fff;
+    transition: all .4s;
+    white-space: nowrap;
+  }
+
+  /* ── CORR MATRIX ── */
+  .corr-matrix {
+    display: grid;
+    grid-template-columns: 80px repeat(8, 1fr);
+    font-size: .72rem;
+    gap: 2px;
+  }
+  .corr-cell {
+    aspect-ratio: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 5px;
+    font-weight: 700;
+    font-size: .72rem;
+    color: #fff;
+  }
+  .corr-label {
+    display: flex;
+    align-items: center;
+    font-size: .72rem;
+    font-weight: 600;
+    color: var(--text-mid);
+    padding-right: 4px;
+  }
+  .corr-header {
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    font-size: .68rem;
+    font-weight: 700;
+    color: var(--blue-dark);
+    padding-bottom: 4px;
+    text-align: center;
+  }
+
+  /* ── FLOW DIAGRAM ── */
+  .flow {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0;
+    flex-wrap: wrap;
+  }
+  .flow-box {
+    background: var(--bg-card);
+    border-radius: 10px;
+    padding: 16px 20px;
+    box-shadow: var(--shadow);
+    text-align: center;
+    min-width: 130px;
+  }
+  .flow-box .fnum {
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 900;
+    font-size: 1.1rem;
+    margin-bottom: 4px;
+  }
+  .flow-box .ftitle {
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 700;
+    font-size: .85rem;
+    color: var(--text-dark);
+    margin-bottom: 4px;
+  }
+  .flow-box .fsub {
+    font-size: .75rem;
+    color: var(--text-light);
+    font-style: italic;
+  }
+  .flow-arrow {
+    font-size: 1.3rem;
+    color: var(--blue-mid);
+    padding: 0 4px;
+    font-weight: 900;
+  }
+
+  /* ── NUMBERED STEP LIST ── */
+  .step-list { display: flex; flex-direction: column; gap: 10px; }
+  .step-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    background: #f8fafc;
+    border-radius: 10px;
+    padding: 12px 16px;
+    border-left: 3px solid var(--teal);
+  }
+  .step-num {
+    background: var(--teal);
+    color: #fff;
+    width: 26px; height: 26px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 800;
+    font-size: .82rem;
+    flex-shrink: 0;
+  }
+  .step-text { font-size: .9rem; line-height: 1.4; }
+
+  /* ── SENSOR GRID ── */
+  .sensor-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px;
+  }
+  .sensor-card {
+    background: var(--bg-card);
+    border-radius: 12px;
+    box-shadow: var(--shadow);
+    padding: 16px 18px;
+    position: relative;
+    overflow: hidden;
+  }
+  .sensor-card .sc-title {
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 700;
+    font-size: .95rem;
+    margin-bottom: 2px;
+  }
+  .sensor-card .sc-unit {
+    font-size: .78rem;
+    color: var(--text-light);
+    margin-bottom: 6px;
+  }
+  .sensor-card .sc-desc {
+    font-size: .8rem;
+    color: var(--text-mid);
+    line-height: 1.4;
+  }
+
+  /* ── PEAK SEASON BOXES ── */
+  .peak-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 18px;
+    margin-bottom: 20px;
+  }
+  .peak-box {
+    background: var(--bg-card);
+    border-radius: 12px;
+    box-shadow: var(--shadow);
+    padding: 20px;
+    text-align: center;
+  }
+  .peak-box .pk-label {
+    font-size: .78rem;
+    font-style: italic;
+    color: var(--text-light);
+    margin-bottom: 8px;
+  }
+  .peak-box .pk-val {
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 900;
+    font-size: 2.1rem;
+    line-height: 1;
+    margin-bottom: 8px;
+  }
+  .peak-box .pk-sub {
+    font-size: .8rem;
+    color: var(--text-mid);
+    line-height: 1.4;
+  }
+
+  /* ── CORR FINDING CARDS ── */
+  .corr-cards {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+  .corr-card {
+    background: var(--bg-card);
+    border-radius: 12px;
+    box-shadow: var(--shadow);
+    padding: 20px 22px;
+  }
+  .corr-card .cc-title {
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 700;
+    font-size: .9rem;
+    margin-bottom: 4px;
+  }
+  .corr-card .cc-r {
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 900;
+    font-size: 1.6rem;
+    line-height: 1;
+    margin-bottom: 8px;
+  }
+  .corr-card .cc-desc {
+    font-size: .82rem;
+    color: var(--text-mid);
+    line-height: 1.5;
+  }
+  .corr-card .cc-action {
+    font-size: .8rem;
+    color: var(--blue-mid);
+    font-style: italic;
+    margin-top: 8px;
+    font-weight: 600;
+  }
+
+  /* ── RECOMMENDATION ITEMS ── */
+  .rec-list { display: flex; flex-direction: column; gap: 12px; }
+  .rec-item {
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+    background: var(--bg-card);
+    border-radius: 12px;
+    box-shadow: var(--shadow);
+    padding: 16px 20px;
+  }
+  .rec-badge {
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 800;
+    font-size: .72rem;
+    padding: 4px 10px;
+    border-radius: 6px;
+    white-space: nowrap;
+    align-self: flex-start;
+    margin-top: 2px;
+  }
+  .rec-badge.critical { background: #fde8e8; color: var(--red); }
+  .rec-badge.high { background: #fff3cd; color: #7d5a00; }
+  .rec-body {}
+  .rec-body strong {
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 700;
+    font-size: .93rem;
+    display: block;
+    margin-bottom: 3px;
+  }
+  .rec-body p { font-size: .84rem; color: var(--text-mid); line-height: 1.5; }
+
+  /* ── DIK DIAGRAM ── */
+  .dik-wrap {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+  .dik-row {
+    border-radius: 12px;
+    padding: 18px 24px;
+    display: flex;
+    align-items: flex-start;
+    gap: 20px;
+    margin-bottom: 4px;
+    position: relative;
+  }
+  .dik-row.data-row { background: #eaf2ff; border-left: 5px solid var(--blue-mid); }
+  .dik-row.info-row { background: #d4edda; border-left: 5px solid var(--green); }
+  .dik-row.know-row { background: var(--blue-dark); color: #fff; border-left: 5px solid var(--teal); border-radius: 12px; }
+  .dik-arrow-wrap {
+    text-align: center;
+    font-size: .72rem;
+    font-weight: 700;
+    color: var(--text-light);
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    padding: 4px 0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .dik-arrow-line { flex: 1; height: 1px; background: var(--border); }
+  .dik-icon {
+    font-size: 2rem;
+    width: 48px;
+    text-align: center;
+    flex-shrink: 0;
+  }
+  .dik-content h4 {
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 800;
+    font-size: 1rem;
+    margin-bottom: 4px;
+  }
+  .dik-content p, .dik-content li {
+    font-size: .85rem;
+    line-height: 1.5;
+    opacity: .85;
+  }
+  .dik-content ul { padding-left: 18px; }
+
+  /* ── TITLE SLIDE ── */
+  .title-slide {
+    background: linear-gradient(135deg, #0f2447 0%, #1a3a6b 50%, #1e6091 100%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    color: #fff;
+    padding: 0 60px;
+    overflow: hidden;
+    position: relative;
+  }
+  .title-slide::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+  }
+  .title-slide .title-box {
+    background: rgba(255,255,255,.08);
+    border: 1px solid rgba(255,255,255,.15);
+    backdrop-filter: blur(6px);
+    border-radius: 20px;
+    padding: 40px 56px;
+    max-width: 800px;
+    width: 100%;
+    position: relative;
+    z-index: 1;
+  }
+  .title-slide h1 {
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 900;
+    font-size: 2.6rem;
+    line-height: 1.1;
+    color: #fff;
+    margin-bottom: 10px;
+  }
+  .title-slide .subtitle {
+    font-size: 1.15rem;
+    opacity: .75;
+    font-style: italic;
+    margin-bottom: 32px;
+  }
+  .title-divider {
+    height: 2px;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,.4), transparent);
+    margin: 0 auto 28px;
+    width: 60%;
+  }
+  .team-label {
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 800;
+    font-size: 1rem;
+    color: var(--teal);
+    margin-bottom: 14px;
+  }
+  .team-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px 24px;
+    text-align: left;
+  }
+  .team-member {
+    font-size: .9rem;
+    opacity: .85;
+  }
+  .team-member strong { font-weight: 700; }
+  .team-member span { opacity: .65; font-style: italic; }
+  .footer-tag {
+    font-size: .75rem;
+    opacity: .45;
+    margin-top: 24px;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+  }
+
+  /* ── OVERVIEW GRID ── */
+  .overview-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+  }
+  .ov-card {
+    background: var(--bg-card);
+    border-radius: 14px;
+    box-shadow: var(--shadow);
+    padding: 22px 20px;
+    position: relative;
+    overflow: hidden;
+    transition: transform .2s, box-shadow .2s;
+    cursor: default;
+  }
+  .ov-card:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-lg);
+  }
+  .ov-num {
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 900;
+    font-size: 1.8rem;
+    line-height: 1;
+    margin-bottom: 6px;
+  }
+  .ov-title {
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 700;
+    font-size: .95rem;
+    color: var(--text-dark);
+    margin-bottom: 4px;
+  }
+  .ov-sub {
+    font-size: .82rem;
+    color: var(--text-mid);
+    font-style: italic;
+  }
+
+  /* ── NODE CARDS (slide 3) ── */
+  .node-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 18px;
+    margin-bottom: 18px;
+  }
+  .node-card {
+    background: var(--bg-card);
+    border-radius: 14px;
+    box-shadow: var(--shadow);
+    padding: 28px 22px;
+    text-align: center;
+  }
+  .node-emoji { font-size: 2.2rem; margin-bottom: 10px; }
+  .node-name {
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 800;
+    font-size: 1.1rem;
+    margin-bottom: 3px;
+  }
+  .node-zone {
+    font-size: .82rem;
+    color: var(--text-light);
+    margin-bottom: 14px;
+  }
+
+  /* ── SAFETY TABLE WRAPPER ── */
+  .safety-legend {
+    display: flex;
+    gap: 16px;
+    flex-direction: column;
+    justify-content: flex-start;
+  }
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: .85rem;
+    font-weight: 600;
+  }
+  .legend-dot {
+    width: 14px; height: 14px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  /* ── BAR CHART ── */
+  .bar-chart { display: flex; flex-direction: column; gap: 10px; }
+  .bar-row { display: flex; align-items: center; gap: 10px; }
+  .bar-name {
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 700;
+    font-size: .78rem;
+    width: 70px;
+    flex-shrink: 0;
+    color: var(--text-dark);
+  }
+  .bar-track {
+    flex: 1;
+    height: 22px;
+    background: #e8eef5;
+    border-radius: 6px;
+    overflow: hidden;
+    position: relative;
+  }
+  .bar-fill {
+    height: 100%;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding-right: 8px;
+    font-size: .72rem;
+    font-weight: 700;
+    color: #fff;
+    transition: width .6s ease;
+  }
+  .bar-val {
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 700;
+    font-size: .8rem;
+    width: 55px;
+    flex-shrink: 0;
+    color: var(--text-mid);
+  }
+
+  /* ── WORKFLOW DIAGRAM ── */
+  .wf-wrap { display: flex; flex-direction: column; gap: 0; align-items: center; }
+  .wf-top {
+    background: var(--bg-card);
+    border: 2px solid var(--border);
+    border-radius: 12px;
+    padding: 14px 40px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 700;
+    font-size: 1rem;
+    color: var(--text-dark);
+  }
+  .wf-arrow-down {
+    width: 2px; height: 22px;
+    background: var(--blue-mid);
+    margin: 0 auto;
+    position: relative;
+  }
+  .wf-arrow-down::after {
+    content: '';
+    position: absolute;
+    bottom: -6px; left: -4px;
+    width: 0; height: 0;
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+    border-top: 7px solid var(--blue-mid);
+  }
+  .wf-mid {
+    background: var(--bg-card);
+    border: 2px solid var(--border);
+    border-radius: 12px;
+    padding: 14px 40px;
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 700;
+    font-size: 1rem;
+    color: var(--text-dark);
+    text-align: center;
+    width: 360px;
+  }
+  .wf-branch {
+    display: flex;
+    gap: 12px;
+    margin-top: 0;
+    position: relative;
+    width: 100%;
+    justify-content: center;
+  }
+  .wf-box {
+    background: var(--bg-card);
+    border: 2px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 14px;
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 700;
+    font-size: .82rem;
+    text-align: center;
+    color: var(--blue-dark);
+    flex: 1;
+    max-width: 160px;
+  }
+  .wf-final {
+    background: var(--blue-dark);
+    border-radius: 12px;
+    padding: 16px 40px;
+    color: #fff;
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 800;
+    font-size: .95rem;
+    text-align: center;
+    width: 100%;
+    max-width: 720px;
+    letter-spacing: .05em;
+  }
+  .wf-line-h {
+    height: 2px;
+    background: var(--blue-mid);
+    width: calc(100% - 160px);
+    max-width: 560px;
+    margin: 0 auto;
+  }
+
+  .subtitle-bar {
+    background: var(--blue-dark);
+    color: #fff;
+    font-size: .72rem;
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 600;
+    letter-spacing: .06em;
+    text-align: center;
+    padding: 4px 0;
+    margin-top: auto;
+    position: fixed;
+    bottom: 56px;
+    left: 0;
+    right: 0;
+    opacity: .6;
+    pointer-events: none;
+  }
+
+  /* scrollbar */
+  .slide::-webkit-scrollbar { width: 5px; }
+  .slide::-webkit-scrollbar-track { background: transparent; }
+  .slide::-webkit-scrollbar-thumb { background: var(--border); border-radius: 5px; }
+</style>
+</head>
+<body>
+
+<div class="slideshow" id="slideshow">
+
+  <!-- ══════════════════════════════════════════════
+       SLIDE 1 — TITLE
+  ══════════════════════════════════════════════ -->
+  <div class="slide title-slide active" id="s1">
+    <div class="title-box">
+      <h1>Environmental Monitoring &amp; Risk Analysis</h1>
+      <p class="subtitle">Big Data Analytics on a Commercial Chicken Farm</p>
+      <div class="title-divider"></div>
+      <div class="team-label">Team 05</div>
+      <div class="team-grid">
+        <div class="team-member"><strong>Charan Rajashekar</strong> <span>— 25042658</span></div>
+        <div class="team-member"><strong>Susan Kimani</strong> <span>— 25041212</span></div>
+        <div class="team-member"><strong>Abrar Shahriar</strong> <span>— 25043636</span></div>
+        <div class="team-member"><strong>Hiruni Keshika</strong> <span>— 25034972</span></div>
+        <div class="team-member"><strong>Tharun Deepak Akilan</strong> <span>— 25037986</span></div>
+      </div>
+      <div class="footer-tag">UFCF8H-15-M · Big Data · Component A · 2026</div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════
+       SLIDE 2 — OVERVIEW
+  ══════════════════════════════════════════════ -->
+  <div class="slide" id="s2">
+    <div class="slide-header">
+      <h2>Presentation Overview</h2>
+    </div>
+    <div class="overview-grid">
+      <div class="ov-card bt-blue">
+        <div class="ov-num c-blue">01</div>
+        <div class="ov-title">Dataset &amp; Context</div>
+        <div class="ov-sub">3 nodes, 254K readings, 17 months</div>
+      </div>
+      <div class="ov-card bt-teal">
+        <div class="ov-num c-teal">02</div>
+        <div class="ov-title">Tools &amp; Approach</div>
+        <div class="ov-sub">PySpark — why and how</div>
+      </div>
+      <div class="ov-card bt-gold">
+        <div class="ov-num c-gold">03</div>
+        <div class="ov-title">Data Cleaning</div>
+        <div class="ov-sub">8-step pre-processing pipeline</div>
+      </div>
+      <div class="ov-card bt-red">
+        <div class="ov-num c-red">04</div>
+        <div class="ov-title">Key Findings</div>
+        <div class="ov-sub">NH3 risk, temp gaps, heating failure</div>
+      </div>
+      <div class="ov-card bt-purple">
+        <div class="ov-num c-purple">05</div>
+        <div class="ov-title">Correlation &amp; Temporal</div>
+        <div class="ov-sub">What drives what, and when</div>
+      </div>
+      <div class="ov-card bt-blue">
+        <div class="ov-num c-blue">06</div>
+        <div class="ov-title">Data → Knowledge</div>
+        <div class="ov-sub">Raw numbers to recommendations</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════
+       SLIDE 3 — DATASET
+  ══════════════════════════════════════════════ -->
+  <div class="slide" id="s3">
+    <div class="slide-header">
+      <h2>The Dataset</h2>
+      <p>Real-world environmental monitoring — UK commercial chicken farm</p>
+    </div>
+    <div class="node-row">
+      <div class="node-card bt-red">
+        <div class="node-emoji">🐥</div>
+        <div class="node-name">AAKTP1</div>
+        <div class="node-zone">Baby Chick Zone (Day 1–7)</div>
+        <div class="stat-big c-red">85,984</div>
+        <div class="stat-label">records</div>
+      </div>
+      <div class="node-card bt-blue">
+        <div class="node-emoji">🐔</div>
+        <div class="node-name">AAKTP2</div>
+        <div class="node-zone">Main Farm East (Day 8+)</div>
+        <div class="stat-big c-blue">80,987</div>
+        <div class="stat-label">records</div>
+      </div>
+      <div class="node-card bt-teal">
+        <div class="node-emoji">🐓</div>
+        <div class="node-name">AAKTP3</div>
+        <div class="node-zone">Main Farm West (Day 8+)</div>
+        <div class="stat-big c-teal">87,127</div>
+        <div class="stat-label">records</div>
+      </div>
+    </div>
+    <div class="banner-row">
+      <div class="banner-item">
+        <div class="val">254,098</div>
+        <div class="lbl">Total Raw Records</div>
+      </div>
+      <div class="banner-sep"></div>
+      <div class="banner-item">
+        <div class="val">12</div>
+        <div class="lbl">Sensor Parameters</div>
+      </div>
+      <div class="banner-sep"></div>
+      <div class="banner-item">
+        <div class="val">17 Months</div>
+        <div class="lbl">Feb 2024 – Jul 2025</div>
+      </div>
+      <div class="banner-sep"></div>
+      <div class="banner-item">
+        <div class="val">&gt;95%</div>
+        <div class="lbl">Data Completeness</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════
+       SLIDE 4 — SENSOR PARAMETERS
+  ══════════════════════════════════════════════ -->
+  <div class="slide" id="s4">
+    <div class="slide-header">
+      <h2>Environmental Sensor Parameters</h2>
+    </div>
+    <div class="sensor-grid">
+      <div class="sensor-card bt-red">
+        <div class="sc-title">🌡️ Temperature</div>
+        <div class="sc-unit">°C</div>
+        <div class="sc-desc">Growth, stress &amp; feed intake</div>
+      </div>
+      <div class="sensor-card bt-blue">
+        <div class="sc-title">💧 Humidity</div>
+        <div class="sc-unit">%RH</div>
+        <div class="sc-desc">Respiratory health &amp; litter quality</div>
+      </div>
+      <div class="sensor-card bt-red" style="border-top-color:#c0392b">
+        <div class="sc-title">⚠️ NH3</div>
+        <div class="sc-unit">ppm</div>
+        <div class="sc-desc">Welfare concern above 25 ppm</div>
+        <div style="margin-top:8px"><span class="badge badge-red">CRITICAL</span></div>
+      </div>
+      <div class="sensor-card bt-orange">
+        <div class="sc-title">💀 H2S</div>
+        <div class="sc-unit">ppm</div>
+        <div class="sc-desc">Toxic gas; eye &amp; lung irritant</div>
+      </div>
+      <div class="sensor-card" style="border-top:4px solid #718096">
+        <div class="sc-title">🌫️ PM2.5 / PM10</div>
+        <div class="sc-unit">μg/m³</div>
+        <div class="sc-desc">Fine dust; respiratory inflammation</div>
+      </div>
+      <div class="sensor-card bt-purple">
+        <div class="sc-title">🧪 TVOC</div>
+        <div class="sc-unit">ppb</div>
+        <div class="sc-desc">Volatile organics from waste</div>
+      </div>
+      <div class="sensor-card" style="border-top:4px solid #f39c12">
+        <div class="sc-title">🔊 Noise</div>
+        <div class="sc-unit">dB</div>
+        <div class="sc-desc">Stress &amp; piling injury risk</div>
+      </div>
+      <div class="sensor-card" style="border-top:4px solid #f1c40f">
+        <div class="sc-title">💡 Light</div>
+        <div class="sc-unit">lux</div>
+        <div class="sc-desc">Circadian rhythm regulation</div>
+      </div>
+      <div class="sensor-card bt-red">
+        <div class="sc-title">🏭 NO2</div>
+        <div class="sc-unit">ppm</div>
+        <div class="sc-desc">Combustion byproduct; lung irritant</div>
+      </div>
+    </div>
+    <div style="margin-top:14px">
+      <div class="alert-box warning">⚠️ CO2 &amp; CO absent from dataset — regulatory gap identified</div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════
+       SLIDE 5 — SAFETY THRESHOLDS
+  ══════════════════════════════════════════════ -->
+  <div class="slide" id="s5">
+    <div class="slide-header">
+      <h2>Safety Thresholds</h2>
+    </div>
+    <div style="display:flex;gap:20px;align-items:flex-start;">
+      <div style="flex:1;overflow-x:auto;">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Parameter</th>
+              <th>Warning</th>
+              <th>Critical</th>
+              <th>Source</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>⚠️ NH3</td><td><span class="badge badge-gold">&gt;25 ppm</span></td><td><span class="badge badge-red">&gt;50 ppm</span></td><td style="font-style:italic;color:var(--text-light)">Carlile (1984)</td></tr>
+            <tr><td>🌡️ Temp (Chick)</td><td><span class="badge badge-gold">&gt;33°C or &lt;29°C</span></td><td><span class="badge badge-red">&gt;37°C or &lt;24°C</span></td><td style="font-style:italic;color:var(--text-light)">Aviagen (2018)</td></tr>
+            <tr><td>🌡️ Temp (Grow-out)</td><td><span class="badge badge-gold">&gt;24°C or &lt;18°C</span></td><td><span class="badge badge-red">&gt;30°C or &lt;12°C</span></td><td style="font-style:italic;color:var(--text-light)">Cobb-Vantress (2020)</td></tr>
+            <tr><td>💧 Humidity</td><td><span class="badge badge-gold">&gt;70% or &lt;50%</span></td><td><span class="badge badge-red">&gt;80% or &lt;40%</span></td><td style="font-style:italic;color:var(--text-light)">Aviagen (2018)</td></tr>
+            <tr><td>🌫️ PM2.5</td><td><span class="badge badge-gold">&gt;35 μg/m³</span></td><td><span class="badge badge-red">&gt;75 μg/m³</span></td><td style="font-style:italic;color:var(--text-light)">US EPA (2012)</td></tr>
+            <tr><td>🏭 NO2</td><td><span class="badge badge-gold">&gt;3 ppm</span></td><td><span class="badge badge-red">&gt;5 ppm</span></td><td style="font-style:italic;color:var(--text-light)">ACGIH (2012)</td></tr>
+            <tr><td>💀 H2S</td><td><span class="badge badge-gold">&gt;5 ppm</span></td><td><span class="badge badge-red">&gt;10 ppm</span></td><td style="font-style:italic;color:var(--text-light)">HSE EH40 (2020)</td></tr>
+            <tr><td>🌫️ PM10</td><td><span class="badge badge-gold">&gt;150 μg/m³</span></td><td><span class="badge badge-red">&gt;250 μg/m³</span></td><td style="font-style:italic;color:var(--text-light)">US EPA (2012)</td></tr>
+            <tr><td>🔊 Noise</td><td><span class="badge badge-gold">&gt;85 dB</span></td><td><span class="badge badge-red">&gt;100 dB</span></td><td style="font-style:italic;color:var(--text-light)">HSE (2005)</td></tr>
+            <tr><td>🧪 TVOC</td><td><span class="badge badge-gold">&gt;500 ppb</span></td><td><span class="badge badge-red">&gt;1000 ppb</span></td><td style="font-style:italic;color:var(--text-light)">WHO (1989)</td></tr>
+            <tr><td>💨 CO2</td><td><span class="badge badge-gold">&gt;2500 ppm</span></td><td><span class="badge badge-red">&gt;3000 ppm</span></td><td style="font-style:italic;color:var(--text-light)">Aviagen (2018)</td></tr>
+            <tr><td>💡 Light</td><td><span class="badge badge-gold">&lt;20 lux</span></td><td><span class="badge badge-red">&lt;10 lux</span></td><td style="font-style:italic;color:var(--text-light)">RSPCA</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="safety-legend" style="min-width:120px;">
+        <div class="legend-item"><div class="legend-dot" style="background:var(--green)"></div> Safe</div>
+        <div class="legend-item"><div class="legend-dot" style="background:var(--gold)"></div> Warning</div>
+        <div class="legend-item"><div class="legend-dot" style="background:var(--red)"></div> Critical</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════
+       SLIDE 6 — TOOLS & APPROACH
+  ══════════════════════════════════════════════ -->
+  <div class="slide" id="s6">
+    <div class="slide-header">
+      <h2>Tools &amp; Approach</h2>
+    </div>
+    <div class="card-grid col2" style="gap:22px;">
+      <div class="card bt-blue">
+        <div style="font-family:'Montserrat',sans-serif;font-weight:800;font-size:1.1rem;color:var(--blue-dark);margin-bottom:14px;">⚡ Apache PySpark</div>
+        <ul style="list-style:none;display:flex;flex-direction:column;gap:9px;">
+          <li style="display:flex;gap:10px;align-items:flex-start;font-size:.88rem;"><span style="color:var(--teal);font-weight:800;flex-shrink:0;">•</span> Distributed engine for Big Data</li>
+          <li style="display:flex;gap:10px;align-items:flex-start;font-size:.88rem;"><span style="color:var(--teal);font-weight:800;flex-shrink:0;">•</span> Handles 254K+ records with lazy evaluation</li>
+          <li style="display:flex;gap:10px;align-items:flex-start;font-size:.88rem;"><span style="color:var(--teal);font-weight:800;flex-shrink:0;">•</span> Spark SQL for familiar query syntax</li>
+          <li style="display:flex;gap:10px;align-items:flex-start;font-size:.88rem;"><span style="color:var(--teal);font-weight:800;flex-shrink:0;">•</span> MLlib for correlation analysis</li>
+          <li style="display:flex;gap:10px;align-items:flex-start;font-size:.88rem;"><span style="color:var(--teal);font-weight:800;flex-shrink:0;">•</span> 100× faster than Hadoop MapReduce</li>
+        </ul>
+      </div>
+      <div class="card bt-teal">
+        <div style="font-family:'Montserrat',sans-serif;font-weight:800;font-size:1.1rem;color:var(--blue-dark);margin-bottom:14px;">🔄 Analysis Pipeline</div>
+        <div class="step-list">
+          <div class="step-item"><div class="step-num">1</div><div class="step-text">Load CSVs with enforced schema</div></div>
+          <div class="step-item"><div class="step-num">2</div><div class="step-text">8-step cleaning: outliers, nulls, outages</div></div>
+          <div class="step-item"><div class="step-num">3</div><div class="step-text">Define safety thresholds from literature</div></div>
+          <div class="step-item"><div class="step-num">4</div><div class="step-text">Classify risk levels per reading</div></div>
+          <div class="step-item"><div class="step-num">5</div><div class="step-text">Temporal, correlation &amp; cross-node analysis</div></div>
+          <div class="step-item"><div class="step-num">6</div><div class="step-text">Visualise with Matplotlib / Seaborn</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════
+       SLIDE 7 — BIG DATA WORKFLOW
+  ══════════════════════════════════════════════ -->
+  <div class="slide" id="s7">
+    <div class="slide-header">
+      <h2>Big Data Workflow</h2>
+    </div>
+    <div class="wf-wrap">
+      <div class="wf-top">
+        <span style="font-size:1.5rem;">⚡</span>
+        <span>PySpark &amp; Spark 4.0.2 — Large-Scale Processing</span>
+      </div>
+      <div class="wf-arrow-down"></div>
+      <div class="wf-mid">DATA LOADING (from Sensors)</div>
+      <div class="wf-arrow-down"></div>
+      <div class="wf-mid">CLEANING (Preprocessing Pipeline)</div>
+      <div class="wf-arrow-down"></div>
+      <div class="wf-line-h"></div>
+      <div class="wf-branch" style="gap:12px;">
+        <div class="wf-box c-blue">AGGREGATION</div>
+        <div class="wf-box c-teal">TEMPORAL<br>ANALYSIS</div>
+        <div class="wf-box" style="color:var(--purple)">CORRELATION<br>ANALYSIS</div>
+        <div class="wf-box c-dark">SQL-BASED<br>ANALYTICS</div>
+      </div>
+      <div class="wf-line-h"></div>
+      <div class="wf-arrow-down"></div>
+      <div class="wf-final">ENVIRONMENTAL &amp; WELFARE INSIGHTS</div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════
+       SLIDE 8 — DATA PRE-PROCESSING
+  ══════════════════════════════════════════════ -->
+  <div class="slide" id="s8">
+    <div class="slide-header">
+      <h2>Step 3 – Data Pre-processing</h2>
+      <p>Faulty sensor records removed before analysis</p>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 340px;gap:22px;">
+      <div class="step-list">
+        <div class="step-item"><div class="step-num">1</div><div class="step-text">Parsed timestamps → Year, Month, Day, Hour</div></div>
+        <div class="step-item"><div class="step-num">2</div><div class="step-text">Removed rows where Temp = 0 &amp; Humidity = 0</div></div>
+        <div class="step-item"><div class="step-num">3</div><div class="step-text">Removed humidity values above 100% RH</div></div>
+        <div class="step-item"><div class="step-num">4</div><div class="step-text">Capped outlier spikes — H2S, PM2.5, PM10, TVOC</div></div>
+        <div class="step-item"><div class="step-num">5</div><div class="step-text">Removed duplicate timestamps</div></div>
+        <div class="step-item"><div class="step-num">6</div><div class="step-text">Sorted data chronologically</div></div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:14px;">
+        <div class="card bt-red" style="text-align:center;">
+          <div class="node-name c-red">AAKTP1</div>
+          <div style="font-family:'Montserrat',sans-serif;font-size:1.2rem;font-weight:800;margin-top:6px;">
+            <span style="color:var(--red)">85,984</span> <span style="color:var(--text-light)">→</span> <span style="color:var(--red)">83,056</span>
+          </div>
+        </div>
+        <div class="card bt-gold" style="text-align:center;">
+          <div class="node-name c-gold">AAKTP2</div>
+          <div style="font-family:'Montserrat',sans-serif;font-size:1.2rem;font-weight:800;margin-top:6px;">
+            <span style="color:var(--gold)">80,987</span> <span style="color:var(--text-light)">→</span> <span style="color:var(--gold)">65,994</span>
+          </div>
+          <div style="font-size:.75rem;color:var(--text-light);font-style:italic;margin-top:4px;">(14,133 outage rows removed)</div>
+        </div>
+        <div class="card bt-teal" style="text-align:center;">
+          <div class="node-name c-teal">AAKTP3</div>
+          <div style="font-family:'Montserrat',sans-serif;font-size:1.2rem;font-weight:800;margin-top:6px;">
+            <span style="color:var(--teal)">87,127</span> <span style="color:var(--text-light)">→</span> <span style="color:var(--teal)">86,131</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════
+       SLIDE 9 — STEP 3–7 PIPELINE
+  ══════════════════════════════════════════════ -->
+  <div class="slide" id="s9">
+    <div class="slide-header">
+      <h2>Step 3 to Step 7: Environmental Data Analysis</h2>
+      <p>Cleaning → Validation → Thresholds → Statistics → Risk Analysis</p>
+    </div>
+    <div class="flow" style="gap:0;margin-bottom:24px;">
+      <div class="flow-box bt-blue">
+        <div class="fnum c-blue">Step 3</div>
+        <div class="ftitle">Data Pre-processing</div>
+        <div class="fsub">Outages, outliers &amp; duplicates removed</div>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-box bt-teal">
+        <div class="fnum c-teal">Step 4</div>
+        <div class="ftitle">Quality Assessment</div>
+        <div class="fsub">0 nulls, 0 negatives — validated</div>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-box bt-gold">
+        <div class="fnum c-gold">Step 5</div>
+        <div class="ftitle">Threshold Definition</div>
+        <div class="fsub">Limits from welfare &amp; safety literature</div>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-box bt-purple">
+        <div class="fnum c-purple">Step 6</div>
+        <div class="ftitle">Descriptive Statistics</div>
+        <div class="fsub">Cross-node mean &amp; variance comparison</div>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-box bt-red">
+        <div class="fnum c-red">Step 7</div>
+        <div class="ftitle">Risk Analysis</div>
+        <div class="fsub">Safe → Warning → Critical → Danger</div>
+      </div>
+    </div>
+    <div class="banner-row">
+      <div class="banner-item"><div class="val">3 Nodes</div></div>
+      <div class="banner-sep"></div>
+      <div class="banner-item"><div class="val">17 Months</div><div class="lbl">Feb 2024 – Jul 2025</div></div>
+      <div class="banner-sep"></div>
+      <div class="banner-item"><div class="val">235,181</div><div class="lbl">Clean Records</div></div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════
+       SLIDE 10 — DATA QUALITY ASSESSMENT
+  ══════════════════════════════════════════════ -->
+  <div class="slide" id="s10">
+    <div class="slide-header">
+      <h2>Step 4 – Data Quality Assessment</h2>
+      <p>Post-cleaning checks confirmed dataset readiness</p>
+    </div>
+    <div class="card-grid col2" style="gap:18px;margin-bottom:20px;">
+      <div class="card bt-teal" style="text-align:center;">
+        <div class="stat-big c-teal" style="font-size:3.5rem;">0</div>
+        <div class="stat-label">Null values in key variables</div>
+      </div>
+      <div class="card bt-teal" style="text-align:center;">
+        <div class="stat-big c-teal" style="font-size:3.5rem;">0</div>
+        <div class="stat-label">Negative values in major variables</div>
+      </div>
+      <div class="card bt-blue" style="text-align:center;">
+        <div class="stat-big c-blue" style="font-size:2rem;">Feb 2024 – Jul 2025</div>
+        <div class="stat-label">Full monitoring period</div>
+      </div>
+      <div class="card bt-red" style="text-align:center;">
+        <div class="stat-big c-red" style="font-size:2.5rem;">High NH3</div>
+        <div class="stat-label">Main concern post-cleaning</div>
+      </div>
+    </div>
+    <div style="display:flex;gap:14px;margin-bottom:8px;">
+      <div style="flex:1;background:#fde8e8;border-radius:10px;padding:12px 18px;border-left:4px solid var(--red);display:flex;align-items:center;justify-content:space-between;">
+        <span style="font-family:'Montserrat',sans-serif;font-weight:700;font-size:.88rem;">AAKTP1</span>
+        <span class="stat-big c-red" style="font-size:1.5rem;">39.02 ppm</span>
+      </div>
+      <div style="flex:1;background:#fff3cd;border-radius:10px;padding:12px 18px;border-left:4px solid var(--gold);display:flex;align-items:center;justify-content:space-between;">
+        <span style="font-family:'Montserrat',sans-serif;font-weight:700;font-size:.88rem;">AAKTP2</span>
+        <span class="stat-big c-gold" style="font-size:1.5rem;">33.17 ppm</span>
+      </div>
+      <div style="flex:1;background:#fff3cd;border-radius:10px;padding:12px 18px;border-left:4px solid var(--gold);display:flex;align-items:center;justify-content:space-between;">
+        <span style="font-family:'Montserrat',sans-serif;font-weight:700;font-size:.88rem;">AAKTP3</span>
+        <span class="stat-big c-gold" style="font-size:1.5rem;">32.78 ppm</span>
+      </div>
+    </div>
+    <div class="alert-box warning">All three nodes exceed the 25 ppm warning threshold</div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════
+       SLIDE 11 — DESCRIPTIVE STATISTICS
+  ══════════════════════════════════════════════ -->
+  <div class="slide" id="s11">
+    <div class="slide-header">
+      <h2>Step 6 – Descriptive Statistics by Node</h2>
+      <p>All three cleaned node datasets combined and grouped by node for direct comparison</p>
+    </div>
+    <div class="banner-row" style="margin-bottom:16px;">
+      <div class="banner-item"><div class="val">83,055</div><div class="lbl">AAKTP1 Clean</div></div>
+      <div class="banner-sep"></div>
+      <div class="banner-item"><div class="val">65,993</div><div class="lbl">AAKTP2 Clean</div></div>
+      <div class="banner-sep"></div>
+      <div class="banner-item"><div class="val">86,131</div><div class="lbl">AAKTP3 Clean</div></div>
+      <div class="banner-sep"></div>
+      <div class="banner-item"><div class="val">235,179</div><div class="lbl">Combined Total</div></div>
+    </div>
+    <div style="overflow-x:auto;">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Node</th><th>Section</th><th>Records</th><th>Avg Temp</th><th>StdDev</th>
+            <th>Min-Max (°C)</th><th>Avg Hum.</th><th>Avg NH3</th><th>Max NH3</th>
+            <th>Avg PM2.5</th><th>Avg H2S</th><th>Avg NO2</th><th>Avg Noise</th><th>Avg TVOC</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="node-tag" style="background:#fde8e8;color:var(--red)">AAKTP1</span></td>
+            <td>Baby Chick (Day 1–7)</td>
+            <td>83,055</td><td>28.74</td><td>3.55</td><td>13–39</td><td>70.96</td>
+            <td style="color:var(--red);font-weight:700;">39.02</td>
+            <td style="color:var(--red);font-weight:700;">218</td>
+            <td>6.86</td><td>1.11</td><td>0.38</td><td>50.28</td><td>114.57</td>
+          </tr>
+          <tr>
+            <td><span class="node-tag" style="background:#dbeafe;color:var(--blue-dark)">AAKTP2</span></td>
+            <td>Main Farm East</td>
+            <td>65,993</td><td>28.10</td><td>3.74</td><td>14–39</td>
+            <td style="color:var(--red);font-weight:700;">75.54</td>
+            <td style="color:var(--red);font-weight:700;">33.17</td>
+            <td style="color:var(--red);font-weight:700;">205</td>
+            <td>5.53</td><td>1.78</td><td>0.40</td><td>49.95</td>
+            <td style="color:var(--blue-mid);font-weight:700;">125.89</td>
+          </tr>
+          <tr>
+            <td><span class="node-tag" style="background:#d4fae8;color:#155724">AAKTP3</span></td>
+            <td>Main Farm West</td>
+            <td>86,131</td>
+            <td style="color:var(--teal);font-weight:700;">26.09</td>
+            <td style="color:var(--red);font-weight:700;">3.20</td>
+            <td>11–38</td><td>68.55</td>
+            <td style="color:var(--red);font-weight:700;">32.78</td>
+            <td style="color:var(--red);font-weight:700;">201</td>
+            <td style="color:var(--gold);font-weight:700;">7.50</td>
+            <td>0.20</td><td>0.29</td><td>47.17</td><td>116.76</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="alert-box danger" style="margin-top:12px;">
+      All three nodes exceed the 25 ppm NH3 welfare threshold — AAKTP1 highest at 39.02 ppm average
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════
+       SLIDE 12 — RISK THRESHOLD VIOLATIONS
+  ══════════════════════════════════════════════ -->
+  <div class="slide" id="s12">
+    <div class="slide-header">
+      <h2>Risk Analysis – Threshold Violations</h2>
+      <p>Ammonia exposure dominates risk across all three monitoring zones</p>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:18px;margin-bottom:18px;">
+      <!-- AAKTP1 -->
+      <div class="card bt-red">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+          <span class="node-tag" style="background:#fde8e8;color:var(--red);font-family:'Montserrat',sans-serif;font-weight:800;font-size:1rem;padding:4px 14px;border-radius:8px;">AAKTP1</span>
+          <span class="stat-big c-red" style="font-size:1.6rem;">80.3% above warning</span>
+        </div>
+        <div class="stacked-bar">
+          <div class="seg" style="width:19.7%;background:var(--green);">19.7%</div>
+          <div class="seg" style="width:66.4%;background:var(--gold);">66.4%</div>
+          <div class="seg" style="width:13.8%;background:var(--red);">13.8%</div>
+          <div class="seg" style="width:0.1%;background:var(--red-dark);"></div>
+        </div>
+        <div style="display:flex;gap:10px;margin-top:8px;">
+          <span class="badge badge-red">Temp Critical: 4.68%</span>
+          <span class="badge badge-blue">PM2.5 Critical: 0.39%</span>
+        </div>
+      </div>
+      <!-- AAKTP2 -->
+      <div class="card bt-blue">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+          <span class="node-tag" style="background:#dbeafe;color:var(--blue-dark);font-family:'Montserrat',sans-serif;font-weight:800;font-size:1rem;padding:4px 14px;border-radius:8px;">AAKTP2</span>
+          <span class="stat-big c-orange" style="font-size:1.6rem;">72.1% above warning</span>
+        </div>
+        <div class="stacked-bar">
+          <div class="seg" style="width:27.9%;background:var(--green);">27.9%</div>
+          <div class="seg" style="width:64.7%;background:var(--gold);">64.7%</div>
+          <div class="seg" style="width:7.0%;background:var(--red);">7%</div>
+          <div class="seg" style="width:0.4%;background:var(--red-dark);"></div>
+        </div>
+        <div style="display:flex;gap:10px;margin-top:8px;">
+          <span class="badge badge-red">Temp Critical: 23.78%</span>
+          <span class="badge badge-blue">PM2.5 Critical: 0.07%</span>
+        </div>
+      </div>
+      <!-- AAKTP3 -->
+      <div class="card bt-teal">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+          <span class="node-tag" style="background:#d4fae8;color:#155724;font-family:'Montserrat',sans-serif;font-weight:800;font-size:1rem;padding:4px 14px;border-radius:8px;">AAKTP3</span>
+          <span class="stat-big c-gold" style="font-size:1.6rem;">64.7% above warning</span>
+        </div>
+        <div class="stacked-bar">
+          <div class="seg" style="width:35.3%;background:var(--green);">35.3%</div>
+          <div class="seg" style="width:62.3%;background:var(--gold);">62.3%</div>
+          <div class="seg" style="width:2.0%;background:var(--red);">2%</div>
+          <div class="seg" style="width:0.4%;background:var(--red-dark);"></div>
+        </div>
+        <div style="display:flex;gap:10px;margin-top:8px;">
+          <span class="badge badge-red">Temp Critical: 19.05%</span>
+          <span class="badge badge-blue">PM2.5 Critical: 0.76%</span>
+        </div>
+      </div>
+    </div>
+    <div class="alert-box info">All three zones exceeded NH3 safe levels for the majority of operating time — ammonia is the single most critical farm-wide risk.</div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════
+       SLIDE 13 — PEAK RISK SEASON
+  ══════════════════════════════════════════════ -->
+  <div class="slide" id="s13">
+    <div class="slide-header">
+      <h2>Step 8 – Temporal Analysis: Peak Risk Season</h2>
+      <p>SQL Query 3 identifies February–April as the highest-risk window across all nodes</p>
+    </div>
+    <div style="font-family:'Montserrat',sans-serif;font-weight:700;font-size:.88rem;color:var(--blue-dark);margin-bottom:12px;text-transform:uppercase;letter-spacing:.06em;">Monthly NH3 Critical Violation Rate (&gt;50 ppm) — Ranked</div>
+    <div class="peak-grid">
+      <div class="peak-box" style="border-top:4px solid var(--red);">
+        <div class="pk-label">AAKTP2 | March 2024</div>
+        <div class="pk-val c-red">100% Critical</div>
+        <div class="pk-sub">Every single reading exceeded 50 ppm. Avg NH3: 79.55 ppm — complete month at crisis level.</div>
+      </div>
+      <div class="peak-box" style="border-top:4px solid #b03030;">
+        <div class="pk-label">AAKTP1 | February 2024</div>
+        <div class="pk-val" style="color:#b03030;">80.4% Critical</div>
+        <div class="pk-sub">Avg NH3: 64.55 ppm — Max 218 ppm. First full month of monitoring already in crisis.</div>
+      </div>
+      <div class="peak-box" style="border-top:4px solid var(--orange);">
+        <div class="pk-label">AAKTP2 | April 2024</div>
+        <div class="pk-val c-orange">66.3% Critical</div>
+        <div class="pk-sub">Avg NH3: 60.19 ppm — Max 205 ppm. Sustained multi-week critical period.</div>
+      </div>
+    </div>
+    <div class="card-grid col2" style="gap:18px;">
+      <div class="card bt-blue">
+        <div style="font-family:'Montserrat',sans-serif;font-weight:700;font-size:.95rem;color:var(--blue-dark);margin-bottom:8px;">Why February–April?</div>
+        <p style="font-size:.86rem;color:var(--text-mid);line-height:1.6;">Winter ventilation is reduced to retain heat. Litter moisture accumulates over months. When spring arrives, bacterial decomposition accelerates rapidly — driving NH3 spikes.</p>
+      </div>
+      <div class="card bt-teal">
+        <div style="font-family:'Montserrat',sans-serif;font-weight:700;font-size:.95rem;color:var(--teal);margin-bottom:8px;">Recommendation</div>
+        <ul style="list-style:none;display:flex;flex-direction:column;gap:5px;font-size:.84rem;color:var(--text-mid);">
+          <li>→ Increase airflow from 1 February each year</li>
+          <li>→ Daily NH3 checks during Feb, Mar, Apr</li>
+          <li>→ Pre-season litter replacement in January</li>
+          <li>→ Automated NH3 trigger at 25 ppm year-round</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════
+       SLIDE 14 — NH3 CRISIS
+  ══════════════════════════════════════════════ -->
+  <div class="slide" id="s14">
+    <div class="slide-header">
+      <h2>Key Finding: Ammonia (NH3) Crisis</h2>
+    </div>
+    <div class="card-grid col3" style="gap:18px;margin-bottom:20px;">
+      <div class="card" style="border-top:4px solid var(--red);text-align:center;">
+        <div style="font-size:.8rem;color:var(--text-light);margin-bottom:4px;">AAKTP1 Exposure</div>
+        <div class="stat-big c-red" style="font-size:3rem;">80.3%</div>
+        <div class="stat-label">Time above 25 ppm</div>
+      </div>
+      <div class="card" style="border-top:4px solid var(--orange);text-align:center;">
+        <div style="font-size:.8rem;color:var(--text-light);margin-bottom:4px;">AAKTP2 Exposure</div>
+        <div class="stat-big c-orange" style="font-size:3rem;">72.1%</div>
+        <div class="stat-label">Time above 25 ppm</div>
+      </div>
+      <div class="card" style="border-top:4px solid var(--gold);text-align:center;">
+        <div style="font-size:.8rem;color:var(--text-light);margin-bottom:4px;">AAKTP3 Exposure</div>
+        <div class="stat-big c-gold" style="font-size:3rem;">64.7%</div>
+        <div class="stat-label">Time above 25 ppm</div>
+      </div>
+    </div>
+    <div class="card bt-red">
+      <div style="font-family:'Montserrat',sans-serif;font-weight:800;font-size:1rem;color:var(--blue-dark);margin-bottom:8px;">Critical Impact Analysis</div>
+      <p style="font-size:.9rem;line-height:1.6;"><span style="color:var(--red);font-weight:700;">Extreme Risk:</span> Peak NH3 reached 218 ppm, over 3× human safety limits. The chick section averages 39 ppm, consistently failing the 25-ppm welfare threshold. This represents the farm's primary environmental hazard.</p>
+    </div>
+    <div style="margin-top:14px;">
+      <div style="font-family:'Montserrat',sans-serif;font-weight:700;font-size:.85rem;color:var(--text-mid);margin-bottom:10px;">Average NH3 by Node vs Threshold</div>
+      <div class="bar-chart">
+        <div class="bar-row">
+          <div class="bar-name">AAKTP1</div>
+          <div class="bar-track">
+            <div class="bar-fill" style="width:75%;background:var(--red);">39 ppm</div>
+            <div style="position:absolute;left:48%;top:0;bottom:0;width:2px;background:rgba(0,0,0,.2);"></div>
+          </div>
+          <div class="bar-val c-red">39.02 ppm</div>
+        </div>
+        <div class="bar-row">
+          <div class="bar-name">AAKTP2</div>
+          <div class="bar-track">
+            <div class="bar-fill" style="width:64%;background:var(--orange);">33 ppm</div>
+          </div>
+          <div class="bar-val c-orange">33.17 ppm</div>
+        </div>
+        <div class="bar-row">
+          <div class="bar-name">AAKTP3</div>
+          <div class="bar-track">
+            <div class="bar-fill" style="width:63%;background:var(--gold);">33 ppm</div>
+          </div>
+          <div class="bar-val c-gold">32.78 ppm</div>
+        </div>
+        <div class="bar-row">
+          <div class="bar-name" style="color:var(--text-light);font-style:italic;">Warning</div>
+          <div class="bar-track">
+            <div class="bar-fill" style="width:48%;background:var(--gold);opacity:.7;"></div>
+            <div style="position:absolute;left:48%;top:-2px;bottom:-2px;width:2px;background:var(--gold);"></div>
+          </div>
+          <div class="bar-val c-gold">25 ppm</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════
+       SLIDE 15 — TEMP & HEATING
+  ══════════════════════════════════════════════ -->
+  <div class="slide" id="s15">
+    <div class="slide-header">
+      <h2>Key Findings: Temp &amp; Heating</h2>
+    </div>
+    <div class="card-grid col2" style="gap:22px;margin-bottom:22px;">
+      <div class="card bt-red">
+        <div style="font-size:.85rem;color:var(--text-light);margin-bottom:8px;">Baby Chick Temp Below Minimum</div>
+        <div class="stat-big c-red" style="font-size:3.5rem;">28.74°C</div>
+        <div style="font-family:'Montserrat',sans-serif;font-weight:700;color:var(--blue-dark);margin:12px 0 6px;">Chick Mortality Risk</div>
+        <p style="font-size:.85rem;color:var(--text-mid);line-height:1.6;">AAKTP1 average vs 29°C minimum needed for chicks (Aviagen, 2018). A 0.26°C gap increases mortality risk from cold stress.</p>
+      </div>
+      <div class="card bt-blue">
+        <div style="font-size:.85rem;color:var(--text-light);margin-bottom:8px;">Node 2 Winter Heating Failure</div>
+        <div class="stat-big c-blue" style="font-size:3.5rem;">14,133</div>
+        <div style="font-family:'Montserrat',sans-serif;font-weight:700;color:var(--blue-dark);margin:12px 0 6px;">System Failure Impact</div>
+        <p style="font-size:.85rem;color:var(--text-mid);line-height:1.6;">Outage readings (17.5% of Node 2 data) clustered Nov 2024 to Jan 2025. Shows complete winter heating failure.</p>
+      </div>
+    </div>
+    <div class="card-grid col2" style="gap:18px;">
+      <div class="card bt-orange">
+        <div style="font-family:'Montserrat',sans-serif;font-weight:700;font-size:.95rem;color:var(--text-dark);margin-bottom:10px;">Temperature Risk by Node</div>
+        <div class="bar-chart">
+          <div class="bar-row"><div class="bar-name">AAKTP1</div><div class="bar-track"><div class="bar-fill" style="width:47%;background:var(--gold);">4.68% crit</div></div></div>
+          <div class="bar-row"><div class="bar-name">AAKTP2</div><div class="bar-track"><div class="bar-fill" style="width:80%;background:var(--red);">23.78% crit</div></div></div>
+          <div class="bar-row"><div class="bar-name">AAKTP3</div><div class="bar-track"><div class="bar-fill" style="width:65%;background:var(--red);">19.05% crit</div></div></div>
+        </div>
+        <p style="font-size:.78rem;color:var(--text-light);font-style:italic;margin-top:8px;">AAKTP2 most affected — winter heating failure Nov 2024–Jan 2025</p>
+      </div>
+      <div class="card bt-blue">
+        <div style="font-family:'Montserrat',sans-serif;font-weight:700;font-size:.95rem;color:var(--text-dark);margin-bottom:10px;">Humidity Risk by Node</div>
+        <div class="bar-chart">
+          <div class="bar-row"><div class="bar-name">AAKTP1</div><div class="bar-track"><div class="bar-fill" style="width:60%;background:var(--gold);">High</div></div></div>
+          <div class="bar-row"><div class="bar-name">AAKTP2</div><div class="bar-track"><div class="bar-fill" style="width:85%;background:var(--red);">Highest</div></div></div>
+          <div class="bar-row"><div class="bar-name">AAKTP3</div><div class="bar-track"><div class="bar-fill" style="width:45%;background:var(--green);">Stable</div></div></div>
+        </div>
+        <p style="font-size:.78rem;color:var(--text-light);font-style:italic;margin-top:8px;">Elevated humidity drives NH3 — strong cross-parameter link</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════
+       SLIDE 16 — CORRELATION ANALYSIS
+  ══════════════════════════════════════════════ -->
+  <div class="slide" id="s16">
+    <div class="slide-header">
+      <h2>Key Finding – Correlation Analysis</h2>
+      <p>Pearson correlations reveal co-production links and environmental drivers across all nodes</p>
+    </div>
+    <div class="corr-cards">
+      <div class="corr-card bt-red">
+        <div class="cc-title">NH3 ↔ NO2</div>
+        <div class="cc-r c-red">r = 0.660 — Strong</div>
+        <div class="cc-desc">Both gases co-produced by organic litter decomposition. When NH3 rises, NO2 rises simultaneously. A single ventilation trigger at 25 ppm NH3 will protect workers against NO2 exposure too.</div>
+        <div class="cc-action">⚠️ Most actionable correlation in the dataset</div>
+      </div>
+      <div class="corr-card bt-orange">
+        <div class="cc-title">Humidity → NH3</div>
+        <div class="cc-r c-orange">r = 0.243 — Moderate</div>
+        <div class="cc-desc">Moist air creates damp bedding, accelerating bacterial decomposition and ammonia release. Humidity control directly suppresses NH3.</div>
+        <div class="cc-action">→ Target humidity 50–70% RH to reduce NH3 risk</div>
+      </div>
+      <div class="corr-card bt-teal">
+        <div class="cc-title">Temperature → TVOC</div>
+        <div class="cc-r c-teal">r = 0.320 — Moderate</div>
+        <div class="cc-desc">Higher temperatures drive volatile organic compound evaporation from litter and waste. Peak TVOC exposure aligns with midday heat.</div>
+        <div class="cc-action">→ Increase ventilation during 10:00–15:00 daily</div>
+      </div>
+      <div class="corr-card bt-green">
+        <div class="cc-title">PM2.5 ↔ PM10</div>
+        <div class="cc-r c-green">r = 0.997 — Near-perfect</div>
+        <div class="cc-desc">Both particle sizes share an identical source — farm dust, feathers and litter disturbance. Treat as a single dust risk. One intervention (litter moisture control) addresses both.</div>
+        <div class="cc-action">→ PM2.5 and PM10 can be managed together</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════
+       SLIDE 17 — DATA > INFORMATION > KNOWLEDGE
+  ══════════════════════════════════════════════ -->
+  <div class="slide" id="s17">
+    <div class="slide-header">
+      <h2>Data → Information → Knowledge</h2>
+    </div>
+    <div class="dik-wrap">
+      <div class="dik-row data-row">
+        <div class="dik-icon">📡</div>
+        <div class="dik-content">
+          <h4 style="color:var(--blue-dark);">DATA — Raw Sensor Readings</h4>
+          <p>254,098 rows × 12 parameters · Timestamps, numbers, node IDs · <em style="color:var(--red);">No context, no meaning. Note: CO2 &amp; CO absent</em></p>
+        </div>
+      </div>
+      <div class="dik-arrow-wrap"><div class="dik-arrow-line"></div><span>DATA PROCESSING &amp; TRANSFORMATION</span><div class="dik-arrow-line"></div></div>
+      <div class="dik-row info-row">
+        <div class="dik-icon">📊</div>
+        <div class="dik-content">
+          <h4 style="color:var(--green);">INFORMATION — Processed Patterns</h4>
+          <p>NH3 exceeds 25 ppm 80% of the time · Temp-NH3 correlation: r = 0.243 · Node 2 outages Nov–Jan 2025</p>
+        </div>
+      </div>
+      <div class="dik-arrow-wrap"><div class="dik-arrow-line"></div><span>ANALYSIS &amp; STRATEGIC VISUALIZATION</span><div class="dik-arrow-line"></div></div>
+      <div class="dik-row know-row">
+        <div class="dik-icon">💡</div>
+        <div class="dik-content">
+          <h4>KNOWLEDGE — Actionable Decisions</h4>
+          <ul>
+            <li>Install ventilation triggered at 25 ppm</li>
+            <li>Increase airflow 10am–3pm daily</li>
+            <li>Install backup heating with auto-alerts</li>
+            <li>Deploy CO2/CO sensors in critical areas</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════
+       SLIDE 18 — RECOMMENDATIONS
+  ══════════════════════════════════════════════ -->
+  <div class="slide" id="s18">
+    <div class="slide-header">
+      <h2>Recommendations</h2>
+    </div>
+    <div class="rec-list">
+      <div class="rec-item">
+        <div class="rec-badge critical">CRITICAL</div>
+        <div class="rec-body">
+          <strong>Backup Heating System</strong>
+          <p>Node 2 heating failure during winter caused 14,133 outage readings. Install with automated alerts to prevent recurrence during the Nov–Jan critical window.</p>
+        </div>
+      </div>
+      <div class="rec-item">
+        <div class="rec-badge critical">CRITICAL</div>
+        <div class="rec-body">
+          <strong>Controlled Ventilation System</strong>
+          <p>Trigger at 25 ppm NH3. Increase ventilation rates during 10:00–15:00 peak period to mitigate animal welfare risks and simultaneously address NO2 exposure.</p>
+        </div>
+      </div>
+      <div class="rec-item">
+        <div class="rec-badge critical">CRITICAL</div>
+        <div class="rec-body">
+          <strong>Baby Chick Temperature Adjustment</strong>
+          <p>Raise thermostat by 1–2°C to prevent cold stress. AAKTP1 current avg 28.74°C vs 29°C minimum recommended by Aviagen (2018).</p>
+        </div>
+      </div>
+      <div class="rec-item">
+        <div class="rec-badge high">HIGH</div>
+        <div class="rec-body">
+          <strong>Litter Management Protocol</strong>
+          <p>Address PM2.5 and PM10 simultaneously through improved litter moisture and dust control. Given r = 0.997 correlation, one intervention resolves both parameters.</p>
+        </div>
+      </div>
+      <div class="rec-item">
+        <div class="rec-badge high">HIGH</div>
+        <div class="rec-body">
+          <strong>Real-Time Monitoring Dashboard</strong>
+          <p>Deploy threshold classification system with integrated CO2 and CO sensor data for comprehensive environmental monitoring. Current regulatory gap must be addressed.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════
+       SLIDE 19 — REFERENCES
+  ══════════════════════════════════════════════ -->
+  <div class="slide" id="s19">
+    <div class="slide-header">
+      <h2>References</h2>
+    </div>
+    <div class="card" style="font-size:.82rem;line-height:1.8;color:var(--text-mid);">
+      <ol style="padding-left:20px;display:flex;flex-direction:column;gap:6px;">
+        <li>Aviagen (2018) <em>Ross broiler management handbook.</em> Aviagen Group.</li>
+        <li>Bist, R.B. and Chai, L. (2022) Advanced strategies for mitigating particulate matter generations in poultry houses. <em>Applied Sciences,</em> 12(22), p.11323.</li>
+        <li>Carlile, F.S. (1984) Ammonia in poultry houses: a literature review. <em>World's Poultry Science Journal,</em> 40(2), pp.99–113.</li>
+        <li>Cobb-Vantress (2022) <em>Broiler management guide.</em> Cobb-Vantress Inc.</li>
+        <li>Health and Safety Executive (2020) <em>EH40/2005 workplace exposure limits</em> (4th edn). HSE.</li>
+        <li>HM Government (2005) <em>Control of Noise at Work Regulations 2005.</em> SI 2005/1643.</li>
+        <li>HM Government (2006) <em>Animal Welfare Act 2006.</em> c.45.</li>
+        <li>Kristensen, H.H. and Wathes, C.M. (2000) Ammonia and poultry welfare: a review. <em>World's Poultry Science Journal,</em> 56(3), pp.235–245.</li>
+        <li>RSPCA (2023) <em>RSPCA welfare standards for chickens.</em> RSPCA Science Group.</li>
+        <li>United States Environmental Protection Agency (2024) <em>Air emissions from animal feeding operations.</em></li>
+        <li>Wang, K. et al. (2023) Particulate matter in poultry house on poultry respiratory disease: a systematic review. <em>Poultry Science,</em> 102(4), p.102556.</li>
+      </ol>
+    </div>
+    <div style="text-align:center;margin-top:18px;font-family:'Montserrat',sans-serif;font-weight:700;color:var(--text-light);font-size:.8rem;letter-spacing:.06em;">
+      UFCF8H-15-M · Big Data · Component A · 2026
+    </div>
+  </div>
+
+</div><!-- /slideshow -->
+
+<!-- ── NAVIGATION BAR ── -->
+<nav class="nav">
+  <div class="nav-left">
+    <button id="btnPrev" onclick="changeSlide(-1)">◀ Prev</button>
+  </div>
+  <div class="nav-center" id="dotContainer"></div>
+  <div class="nav-right">
+    <span class="slide-counter" id="slideCounter">1 / 19</span>
+    <button id="btnNext" onclick="changeSlide(1)">Next ▶</button>
+  </div>
+</nav>
+
+<script>
+  const slides = document.querySelectorAll('.slide');
+  const total = slides.length;
+  let current = 0;
+
+  const dotContainer = document.getElementById('dotContainer');
+  const counter = document.getElementById('slideCounter');
+  const btnPrev = document.getElementById('btnPrev');
+  const btnNext = document.getElementById('btnNext');
+
+  // Build dots
+  slides.forEach((_, i) => {
+    const d = document.createElement('div');
+    d.className = 'nav-dot' + (i === 0 ? ' active' : '');
+    d.onclick = () => goTo(i);
+    dotContainer.appendChild(d);
+  });
+
+  function goTo(n) {
+    slides[current].classList.remove('active');
+    dotContainer.children[current].classList.remove('active');
+    current = Math.max(0, Math.min(total - 1, n));
+    slides[current].classList.add('active');
+    dotContainer.children[current].classList.add('active');
+    counter.textContent = `${current + 1} / ${total}`;
+    btnPrev.disabled = current === 0;
+    btnNext.disabled = current === total - 1;
+    // reset scroll
+    slides[current].scrollTop = 0;
+  }
+
+  function changeSlide(dir) { goTo(current + dir); }
+
+  // Keyboard navigation
+  document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown') changeSlide(1);
+    if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp')   changeSlide(-1);
+  });
+
+  // Init
+  goTo(0);
+</script>
+</body>
+</html>
