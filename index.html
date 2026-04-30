@@ -914,6 +914,60 @@
   .slide::-webkit-scrollbar { width: 5px; }
   .slide::-webkit-scrollbar-track { background: transparent; }
   .slide::-webkit-scrollbar-thumb { background: var(--border); border-radius: 5px; }
+
+  /* ══════════════════════════════════════════
+     MOBILE RESPONSIVE — scroll-first approach
+     Layouts stay intact; user scrolls up/down
+  ══════════════════════════════════════════ */
+  @media (max-width: 768px) {
+
+    /* Give slides room to breathe and scroll freely */
+    .slide {
+      padding: 16px 12px 70px;
+      /* height is already 100vh via inset:0; overflow-y:auto keeps scroll */
+    }
+
+    /* Slightly tighten header text */
+    .slide-header { margin-bottom: 14px; }
+    .slide-header h2 { font-size: 1.15rem; line-height: 1.2; }
+    .slide-header p  { font-size: .8rem; }
+
+    /* Nav — slimmer, hide dots (too many to tap), keep Prev/Next + counter */
+    .nav { height: 50px; padding: 0 10px; }
+    .nav button { padding: 6px 14px; font-size: .78rem; }
+    .nav-center { display: none; }
+    .slide-counter { font-size: .72rem; min-width: 38px; }
+    .nav-right a { font-size: .72rem; padding: 5px 9px; }
+
+    /* Title slide */
+    .title-slide .title-box { padding: 24px 18px; }
+    .title-slide h1 { font-size: 1.45rem; }
+    .title-slide .subtitle { font-size: .88rem; }
+    .team-grid { grid-template-columns: 1fr; gap: 4px; }
+    .team-member { font-size: .82rem; }
+
+    /* Tables — horizontal scroll so columns don't crush */
+    .data-table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+    .data-table { font-size: .72rem; min-width: 600px; }
+    .data-table thead th,
+    .data-table tbody td { padding: 6px 8px; }
+
+    /* Banner row wraps on small screens */
+    .banner-row { flex-wrap: wrap; padding: 12px 14px; gap: 8px; }
+    .banner-item .val { font-size: 1.2rem; }
+    .banner-sep { display: none; }
+
+    /* Cards — just trim padding */
+    .card { padding: 14px 14px; }
+    .stat-big { font-size: 2rem !important; }
+
+    /* Rec items stack label above body */
+    .rec-item { flex-direction: column; gap: 6px; }
+    .rec-badge { align-self: flex-start; }
+
+    /* DIK rows stack icon above content */
+    .dik-row { gap: 8px; padding: 14px 14px; }
+  }
 </style>
 </head>
 <body>
@@ -1103,8 +1157,8 @@
       <h2>Safety Thresholds</h2>
     </div>
     <div style="display:flex;gap:20px;align-items:flex-start;">
-      <div style="flex:1;overflow-x:auto;">
-        <table class="data-table">
+      <div style="flex:1;overflow-x:auto;-webkit-overflow-scrolling:touch;">
+        <table class="data-table" style="min-width:520px;">
           <thead>
             <tr>
               <th>Parameter</th>
@@ -1348,8 +1402,8 @@
       <div class="banner-sep"></div>
       <div class="banner-item"><div class="val">235,179</div><div class="lbl">Combined Total</div></div>
     </div>
-    <div style="overflow-x:auto;">
-      <table class="data-table">
+    <div style="overflow-x:auto;-webkit-overflow-scrolling:touch;">
+      <table class="data-table" style="min-width:860px;">
         <thead>
           <tr>
             <th>Node</th><th>Section</th><th>Records</th><th>Avg Temp</th><th>StdDev</th>
@@ -1812,6 +1866,21 @@
     if (e.key === 'ArrowRight' || e.key === 'ArrowDown') changeSlide(1);
     if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp')   changeSlide(-1);
   });
+
+  // Touch swipe navigation
+  let touchStartX = 0, touchStartY = 0;
+  document.addEventListener('touchstart', e => {
+    touchStartX = e.touches[0].clientX;
+    touchStartY = e.touches[0].clientY;
+  }, { passive: true });
+  document.addEventListener('touchend', e => {
+    const dx = e.changedTouches[0].clientX - touchStartX;
+    const dy = e.changedTouches[0].clientY - touchStartY;
+    // Only fire if swipe is clearly horizontal and significant
+    if (Math.abs(dx) > Math.abs(dy) * 1.5 && Math.abs(dx) > 60) {
+      changeSlide(dx < 0 ? 1 : -1);
+    }
+  }, { passive: true });
 
   // Init
   goTo(0);
